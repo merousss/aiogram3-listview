@@ -4,6 +4,10 @@
 ![til](img/123.gif)
 ## Usage
 
+```python
+from aiogram3_listview import SimpleListView, LV_CallBack    
+```
+
 ### Basic
 ``` python
 data_list1 = random.sample(range(200), 101)    # example: data_list1 = ['foo', 'bar', 'foobar']
