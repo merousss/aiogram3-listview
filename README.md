@@ -97,7 +97,7 @@ lv = SimpleListView(
 lv2 = SimpleListView(
     data_list=data_list2,
     rows=6,
-    columns=9,
+    columns=5,
     action='handle_lv2'
 )
 
