@@ -4,45 +4,21 @@
 
 ## Usage
 
+### Basic
 ``` python
-import random
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters.callback_data import CallbackQuery
-from aiogram.filters import Command
-from aiogram3_listview import SimpleListView, LV_CallBack
-import logging
-
-API_TOKEN = 'TOKEN'
-
-logging.basicConfig(level=logging.INFO)
-
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
-
 data_list1 = random.sample(range(200), 101)
 
-# extra buttons
-buttons = {                 # 'text' : 'action'
-    'meow': 'send_meow',    # builder.button(text='meow', callback_data=ListView(extra_act='send_meow'))
-    'back': 'send_back',
-    'text': 'test'
-}
-
-
-lv_1 = SimpleListView(
+lv = SimpleListView(
     data_list=data_list1,
     rows=5,
     columns=5,
-    action='first_lv',
-    buttons=buttons,
-    btns_per_row=3
+    action='handle_lv'
 )
 
 
 @dp.message(Command(commands=['start']))    # start command
 async def start(message: Message):
-    await message.answer('Start message', reply_markup = await lv_1.start_lv())
+    await message.answer('Start message', reply_markup = await lv.start_lv())
 
 
 @dp.callback_query(LV_CallBack.filter())    # listview callback
@@ -50,8 +26,48 @@ async def lv_callback(
         callback: CallbackQuery,
         callback_data: LV_CallBack
 ):
-    if callback_data.action == 'first_lv':
-        index = await lv_1.process_selection(callback, callback_data)
+    if callback_data.action == 'handle_lv':
+        index = await lv.process_selection(callback, callback_data)
+
+        if index is not None:
+            await callback.message.answer(f'index: {index} | item: {data_list1[index]}')
+
+    await callback.answer()
+
+
+```
+---
+### With buttons
+``` python
+data_list1 = random.sample(range(200), 101)
+
+buttons = {                 # 'text' : 'action'
+    'meow': 'send_meow',
+    'text': 'test'
+}
+
+lv = SimpleListView(
+    data_list=data_list1,
+    rows=5,
+    columns=5,
+    action='handle_lv',
+    buttons=buttons,
+    btns_per_row=2
+)
+
+
+@dp.message(Command(commands=['start']))    # start command
+async def start(message: Message):
+    await message.answer('Start message', reply_markup = await lv.start_lv())
+
+
+@dp.callback_query(LV_CallBack.filter())    # listview callback
+async def lv_callback(
+        callback: CallbackQuery,
+        callback_data: LV_CallBack
+):
+    if callback_data.action == 'handle_lv':
+        index = await lv.process_selection(callback, callback_data)
 
         if index is not None:
             await callback.message.answer(f'index: {index} | item: {data_list1[index]}')
@@ -62,12 +78,56 @@ async def lv_callback(
 
         if callback_data.extra_act == 'test':
             await callback.message.answer('❤️')
+
+    await callback.answer()
+```
+---
+### Multiple
+``` python
+data_list1 = random.sample(range(200), 101)
+data_list2 = random.sample(range(200), 101)
+
+lv = SimpleListView(
+    data_list=data_list1,
+    rows=5,
+    columns=5,
+    action='handle_lv'
+)
+
+lv2 = SimpleListView(
+    data_list=data_list2,
+    rows=6,
+    columns=9,
+    action='handle_lv2'
+)
+
+
+@dp.message(Command(commands=['start']))    # start command
+async def start(message: Message):
+    await message.answer('First', reply_markup = await lv.start_lv())
+
+@dp.message(Command(commands=['lv2']))    # 2-nd list view command
+async def start(message: Message):
+    await message.answer('Second', reply_markup = await lv2.start_lv())
+
+
+@dp.callback_query(LV_CallBack.filter())    # listview callback
+async def lv_callback(
+        callback: CallbackQuery,
+        callback_data: LV_CallBack
+):
+    if callback_data.action == 'handle_lv':
+        index = await lv.process_selection(callback, callback_data)
+
+        if index is not None:
+            await callback.message.answer(f'index: {index} | item: {data_list1[index]}')
+
+    if callback_data.action == 'handle_lv2':
+        index = await lv2.process_selection(callback, callback_data)
+
+        if index is not None:
+            await callback.message.answer(f'index: {index} | item: {data_list2[index]}')
+
     await callback.answer()
 
-if __name__ == '__main__':
-    try:
-        dp.run_polling(bot)
-    finally:
-        bot.session.close()
-        print('Bot stopped.')
 ```
