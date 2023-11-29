@@ -6,13 +6,13 @@
 
 ### Basic
 ``` python
-data_list1 = random.sample(range(200), 101)
+data_list1 = random.sample(range(200), 101)    # example: data_list1 = ['foo', 'bar', 'foobar']
 
 lv = SimpleListView(
-    data_list=data_list1,
-    rows=5,
-    columns=5,
-    action='handle_lv'
+    data_list=data_list1,    # data
+    rows=5,                  # buttons per row
+    columns=5,               # buttons per column
+    action='handle_lv'       # custom callback action
 )
 
 
